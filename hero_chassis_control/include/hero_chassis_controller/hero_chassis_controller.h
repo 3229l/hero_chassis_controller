@@ -43,10 +43,13 @@ class HeroChassisController : public controller_interface::Controller<hardware_i
 
   ros::Publisher odom_pub;
   tf::TransformBroadcaster odom_broadcaster;
-  tf::TransformListener listener;
   geometry_msgs::Quaternion odom_quat;
   geometry_msgs::TransformStamped odom_trans;
   nav_msgs::Odometry odom;
+
+  geometry_msgs::Vector3Stamped vector_in, vector_out;
+  tf::StampedTransform transform;
+  tf::TransformListener listener;
 
 private:
   int loop_count_{};
@@ -61,15 +64,17 @@ private:
   double Vx_actual{0.0}, Vy_actual{0.0}, Vw_actual{0.0};
   //Information of geometry_msgs::Twist &msg
   double Vx_expected{0.0}, Vy_expected{0.0}, Vw_expected{0.0};
-  //information 0f chassis
+  //Information 0f chassis
   double Wheel_Track{};//轮距
   double Wheel_Base{};//轴距
   double Wheel_Radius{};//轮子半径
-  //pid error
+  //Pid error
   double error[5]{0.0};
-  //odom pose
+  //Odom pose
   double dt{};
   double x{0.0}, y{0.0}, th{0.0};
+  //Transform from odom to base_link
+  bool Global_Coordinate_Mode{};
 
   ros::Time last_time;
   ros::Time current_time;

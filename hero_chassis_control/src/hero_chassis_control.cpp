@@ -17,6 +17,8 @@ bool HeroChassisController::init(hardware_interface::EffortJointInterface *effor
   controller_nh.getParam("Wheel_Track", Wheel_Track);
   controller_nh.getParam("Wheel_Base", Wheel_Base);
   controller_nh.getParam("Wheel_Radius", Wheel_Radius);
+  controller_nh.getParam("Alpha", Alpha);
+  controller_nh.getParam("Global_Coordinate_Mode", Global_Coordinate_Mode);
 
   front_left_joint_ = effort_joint_interface->getHandle("left_front_wheel_joint");
   front_right_joint_ = effort_joint_interface->getHandle("right_front_wheel_joint");
@@ -46,6 +48,19 @@ bool HeroChassisController::init(hardware_interface::EffortJointInterface *effor
 
 void HeroChassisController::update(const ros::Time &time, const ros::Duration &period) {
   current_time = time;
+
+  if(Global_Coordinate_Mode) {
+    vector_in.header.frame_id = "odom";
+    vector_in.header.stamp = ros::Time::now();
+    vector_in.vector.x = Vx_expected;
+    vector_in.vector.y = Vy_expected;
+    listener.waitForTransform("base_link", "odom", ros::Time(0), ros::Duration(1.0));
+    listener.lookupTransform("base_link", "odom", ros::Time(0), transform);
+    listener.transformVector("base_link", vector_in, vector_out);
+    Vx_expected = vector_out.vector.x;
+    Vy_expected = vector_out.vector.y;
+  }
+
   //excepted and actual velocity of wheels
   calculateWheelExcepetedVelocity();
   vel_actual[1] = front_left_joint_.getVelocity();

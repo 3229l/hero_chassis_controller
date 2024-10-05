@@ -9,6 +9,7 @@ controller:
     Wheel_Track: 0.4
     Wheel_Base: 0.4
     Wheel_Radius: 0.05
+    Global_Coordinate_Mode: True
 
   joint_state_controller:
     type: joint_state_controller/JointStateController
