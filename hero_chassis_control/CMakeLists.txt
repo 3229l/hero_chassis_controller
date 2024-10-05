@@ -13,6 +13,7 @@ add_definitions(-Wall -Werror)
 find_package(catkin  REQUIRED
     COMPONENTS
     roscpp
+    rospy
     roslint
     controller_interface
     hardware_interface
@@ -23,6 +24,8 @@ find_package(catkin  REQUIRED
     control_msgs
     control_toolbox
     dynamic_reconfigure
+    nav_msgs
+    tf
     )
 
 generate_dynamic_reconfigure_options(
@@ -61,6 +64,8 @@ catkin_package(
     control_msgs
     control_toolbox
     dynamic_reconfigure
+    nav_msgs
+    tf
     DEPENDS
 )
 
@@ -73,7 +78,6 @@ catkin_package(
 include_directories(
     include
     ${catkin_INCLUDE_DIRS}
-
     ${dynamic_reconfigure_INCLUDE_DIRS}
 #    ${PROJECT_SOURCE_DIR}/devel/include
     # Set manually because Eigen sets a non standard INCLUDE DIR
@@ -86,14 +90,12 @@ add_library(${PROJECT_NAME}
 
 add_dependencies(${PROJECT_NAME}
     ${catkin_EXPORTED_TARGETS}
+    ${PROJECT_NAME}_gencfg
     )
-
-add_dependencies(hero_chassis_control ${PROJECT_NAME}_gencfg)
 
 target_link_libraries(${PROJECT_NAME}
     ${catkin_LIBRARIES}
     )
-
 
 #############
 ## Install ##

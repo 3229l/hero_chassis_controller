@@ -12,9 +12,11 @@
 #include <control_msgs/JointControllerState.h>
 #include <realtime_tools/realtime_publisher.h>
 #include <control_toolbox/pid.h>
-
 #include <dynamic_reconfigure/server.h>
 #include <hero_chassis_control/PidConfig.h>
+#include <tf/transform_broadcaster.h>
+#include <nav_msgs/Odometry.h>
+#include <tf/transform_listener.h>
 
 // #define RADIUS 0.05
 
@@ -38,6 +40,14 @@ class HeroChassisController : public controller_interface::Controller<hardware_i
 
   dynamic_reconfigure::Server<hero_chassis_control::PidConfig>::CallbackType f;
   dynamic_reconfigure::Server<hero_chassis_control::PidConfig> server_;
+
+  ros::Publisher odom_pub;
+  tf::TransformBroadcaster odom_broadcaster;
+  tf::TransformListener listener;
+  geometry_msgs::Quaternion odom_quat;
+  geometry_msgs::TransformStamped odom_trans;
+  nav_msgs::Odometry odom;
+
 private:
   int loop_count_{};
   //wheel_velocity_actual
@@ -57,9 +67,12 @@ private:
   double Wheel_Radius{};//轮子半径
   //pid error
   double error[5]{0.0};
+  //odom pose
+  double dt{};
+  double x{0.0}, y{0.0}, th{0.0};
 
   ros::Time last_time;
-  ros::Time now;
+  ros::Time current_time;
 
   std::unique_ptr<
       realtime_tools::RealtimePublisher<
@@ -70,7 +83,8 @@ private:
   void calculateWheelExcepetedVelocity();
   //Calculate velocity of chassis
   void calculateChassisActualVelocity();
-
+  void Transform_broadcast();
+  void Odometry_publish();
 };
 
 }// namespace hero_chassis_controller
