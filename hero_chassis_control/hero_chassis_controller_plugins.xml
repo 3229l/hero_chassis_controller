@@ -1,4 +1,4 @@
-<library path="lib/libhero_chassis_controller">
+<library path="lib/libhero_chassis_control">
 
   <class name="hero_chassis_controller/HeroChassisController"
          type="hero_chassis_controller::HeroChassisController"

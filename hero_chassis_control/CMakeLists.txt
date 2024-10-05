@@ -10,10 +10,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_definitions(-Wall -Werror)
 
 ## Find catkin macros and libraries
-find_package(catkin REQUIRED
+find_package(catkin  REQUIRED
     COMPONENTS
     roscpp
-    rospy
     roslint
     controller_interface
     hardware_interface
@@ -22,8 +21,13 @@ find_package(catkin REQUIRED
     realtime_tools
     geometry_msgs
     control_msgs
-
+    control_toolbox
+    dynamic_reconfigure
     )
+
+generate_dynamic_reconfigure_options(
+    config/pid.cfg
+)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -40,8 +44,10 @@ find_package(catkin REQUIRED
 catkin_package(
     INCLUDE_DIRS
     include
+        ${dynamic_reconfigure_INCLUDE_DIRS}
     ## This is only necessary because Eigen3 sets a non-standard EIGEN3_INCLUDE_DIR variable
     LIBRARIES
+        ${PROJECT_NAME}
     CATKIN_DEPENDS
     roscpp
     rospy
@@ -53,6 +59,8 @@ catkin_package(
     realtime_tools
     geometry_msgs
     control_msgs
+    control_toolbox
+    dynamic_reconfigure
     DEPENDS
 )
 
@@ -65,6 +73,9 @@ catkin_package(
 include_directories(
     include
     ${catkin_INCLUDE_DIRS}
+
+    ${dynamic_reconfigure_INCLUDE_DIRS}
+#    ${PROJECT_SOURCE_DIR}/devel/include
     # Set manually because Eigen sets a non standard INCLUDE DIR
 )
 
@@ -76,6 +87,8 @@ add_library(${PROJECT_NAME}
 add_dependencies(${PROJECT_NAME}
     ${catkin_EXPORTED_TARGETS}
     )
+
+add_dependencies(hero_chassis_control ${PROJECT_NAME}_gencfg)
 
 target_link_libraries(${PROJECT_NAME}
     ${catkin_LIBRARIES}
@@ -125,3 +138,5 @@ target_link_libraries(${PROJECT_NAME}
 ##########################
 
 roslint_cpp()
+
+
