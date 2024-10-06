@@ -47,7 +47,7 @@ class HeroChassisController : public controller_interface::Controller<hardware_i
   geometry_msgs::TransformStamped odom_trans;
   nav_msgs::Odometry odom;
 
-  geometry_msgs::Vector3Stamped vector_in, vector_out;
+  geometry_msgs::Vector3Stamped vector_in, vector_out, last_vector_out;
   tf::StampedTransform transform;
   tf::TransformListener listener;
 
@@ -73,8 +73,8 @@ private:
   //Odom pose
   double dt{};
   double x{0.0}, y{0.0}, th{0.0};
-  //Transform from odom to base_link
   bool Global_Coordinate_Mode{};
+  bool Transform_Available;
 
   ros::Time last_time;
   ros::Time current_time;

@@ -19,6 +19,7 @@ bool HeroChassisController::init(hardware_interface::EffortJointInterface *effor
   controller_nh.getParam("Wheel_Radius", Wheel_Radius);
   controller_nh.getParam("Alpha", Alpha);
   controller_nh.getParam("Global_Coordinate_Mode", Global_Coordinate_Mode);
+  controller_nh.getParam("Transform_Available", Transform_Available);
 
   front_left_joint_ = effort_joint_interface->getHandle("left_front_wheel_joint");
   front_right_joint_ = effort_joint_interface->getHandle("right_front_wheel_joint");
@@ -48,19 +49,6 @@ bool HeroChassisController::init(hardware_interface::EffortJointInterface *effor
 
 void HeroChassisController::update(const ros::Time &time, const ros::Duration &period) {
   current_time = time;
-
-  if(Global_Coordinate_Mode) {
-    vector_in.header.frame_id = "odom";
-    vector_in.header.stamp = ros::Time::now();
-    vector_in.vector.x = Vx_expected;
-    vector_in.vector.y = Vy_expected;
-    listener.waitForTransform("base_link", "odom", ros::Time(0), ros::Duration(1.0));
-    listener.lookupTransform("base_link", "odom", ros::Time(0), transform);
-    listener.transformVector("base_link", vector_in, vector_out);
-    Vx_expected = vector_out.vector.x;
-    Vy_expected = vector_out.vector.y;
-  }
-
   //excepted and actual velocity of wheels
   calculateWheelExcepetedVelocity();
   vel_actual[1] = front_left_joint_.getVelocity();
@@ -70,12 +58,33 @@ void HeroChassisController::update(const ros::Time &time, const ros::Duration &p
   // ROS_INFO("Informations of : vel_actual \n"
   //              "vel_actual[1]:%f, vel_actual[2]:%f, vel_actual[3]:%f, vel_actual[4]:%f ",
   //              vel_actual[1], vel_actual[2], vel_actual[3], vel_actual[4]);
-
   calculateChassisActualVelocity();
   //broadcast Transform from "base_link" to "odom"
   Transform_broadcast();
   //publish the odometry message
   Odometry_publish();
+  if(Global_Coordinate_Mode) {
+    vector_in.header.frame_id = "odom";
+    vector_in.header.stamp = ros::Time::now();
+    vector_in.vector.x = Vx_expected;
+    vector_in.vector.y = Vy_expected;
+    // listener.waitForTransform("base_link", "odom", ros::Time(0), ros::Duration(0.05));
+    try {
+      listener.lookupTransform("base_link", "odom", ros::Time(0), transform);
+      listener.transformVector("base_link", vector_in, vector_out);
+      Vx_expected = vector_out.vector.x;
+      Vy_expected = vector_out.vector.y;
+      last_vector_out = vector_out;
+      Transform_Available = true;
+    }catch(tf::TransformException &ex) {
+      ROS_WARN("%s", ex.what());
+      if (Transform_Available) {
+        // 使用上一次成功的变换
+        Vx_expected = last_vector_out.vector.x;
+        Vy_expected = last_vector_out.vector.y;
+      }
+    }
+  }
   //pid control
   for ( int i = 1; i <= 4; i++ ) {
     vel_smoothed [i] = vel_actual[i];
@@ -160,7 +169,7 @@ void HeroChassisController::Transform_broadcast() {
   th += delta_th;
 
   odom_quat = tf::createQuaternionMsgFromYaw(th);
-  odom_trans.header.stamp = current_time;
+  odom_trans.header.stamp = ros::Time::now();
   odom_trans.header.frame_id = "odom";
   odom_trans.child_frame_id = "base_link";
   odom_trans.transform.translation.x = x;
@@ -172,7 +181,7 @@ void HeroChassisController::Transform_broadcast() {
 }
 
 void HeroChassisController::Odometry_publish() {
-  odom.header.stamp = current_time;
+  odom.header.stamp = ros::Time::now();
   odom.header.frame_id = "odom";
   //set the position
   odom.pose.pose.position.x = x;
