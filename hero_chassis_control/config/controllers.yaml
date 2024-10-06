@@ -11,6 +11,7 @@ controller:
     Wheel_Radius: 0.05
     Global_Coordinate_Mode: True
     Transform_Available: false
+    Tf_Publish_Interval: 0.01 //对应100Hz
 
   joint_state_controller:
     type: joint_state_controller/JointStateController

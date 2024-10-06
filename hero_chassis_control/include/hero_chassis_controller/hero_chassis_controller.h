@@ -50,6 +50,8 @@ class HeroChassisController : public controller_interface::Controller<hardware_i
   geometry_msgs::Vector3Stamped vector_in, vector_out, last_vector_out;
   tf::StampedTransform transform;
   tf::TransformListener listener;
+  double Tf_Publish_Interval;
+  ros::Time last_tf_publish_time;
 
 private:
   int loop_count_{};

@@ -20,6 +20,7 @@ bool HeroChassisController::init(hardware_interface::EffortJointInterface *effor
   controller_nh.getParam("Alpha", Alpha);
   controller_nh.getParam("Global_Coordinate_Mode", Global_Coordinate_Mode);
   controller_nh.getParam("Transform_Available", Transform_Available);
+  controller_nh.getParam("Tf_Publish_Interval", Tf_Publish_Interval);
 
   front_left_joint_ = effort_joint_interface->getHandle("left_front_wheel_joint");
   front_right_joint_ = effort_joint_interface->getHandle("right_front_wheel_joint");
@@ -60,15 +61,18 @@ void HeroChassisController::update(const ros::Time &time, const ros::Duration &p
   //              vel_actual[1], vel_actual[2], vel_actual[3], vel_actual[4]);
   calculateChassisActualVelocity();
   //broadcast Transform from "base_link" to "odom"
-  Transform_broadcast();
+  if((current_time - last_tf_publish_time).toSec() >= Tf_Publish_Interval) {
+    Transform_broadcast();
+    last_tf_publish_time = current_time;
+  }
   //publish the odometry message
   Odometry_publish();
+
   if(Global_Coordinate_Mode) {
     vector_in.header.frame_id = "odom";
     vector_in.header.stamp = ros::Time::now();
     vector_in.vector.x = Vx_expected;
     vector_in.vector.y = Vy_expected;
-    // listener.waitForTransform("base_link", "odom", ros::Time(0), ros::Duration(0.05));
     try {
       listener.lookupTransform("base_link", "odom", ros::Time(0), transform);
       listener.transformVector("base_link", vector_in, vector_out);
@@ -169,7 +173,7 @@ void HeroChassisController::Transform_broadcast() {
   th += delta_th;
 
   odom_quat = tf::createQuaternionMsgFromYaw(th);
-  odom_trans.header.stamp = ros::Time::now();
+  odom_trans.header.stamp = current_time;
   odom_trans.header.frame_id = "odom";
   odom_trans.child_frame_id = "base_link";
   odom_trans.transform.translation.x = x;
@@ -181,7 +185,7 @@ void HeroChassisController::Transform_broadcast() {
 }
 
 void HeroChassisController::Odometry_publish() {
-  odom.header.stamp = ros::Time::now();
+  odom.header.stamp = current_time;
   odom.header.frame_id = "odom";
   //set the position
   odom.pose.pose.position.x = x;
