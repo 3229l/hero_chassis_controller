@@ -26,6 +26,7 @@ find_package(catkin  REQUIRED
     dynamic_reconfigure
     nav_msgs
     tf
+    teleop_twist_keyboard
     )
 
 generate_dynamic_reconfigure_options(
@@ -96,6 +97,9 @@ add_dependencies(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     ${catkin_LIBRARIES}
     )
+
+add_executable(teleop_twist_keyboard src/teleop_twist_keyboard.cpp)
+target_link_libraries(teleop_twist_keyboard ${catkin_LIBRARIES})
 
 #############
 ## Install ##

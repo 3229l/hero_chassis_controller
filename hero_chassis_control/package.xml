@@ -25,6 +25,7 @@
   <depend>dynamic_reconfigure</depend>
   <depend>nav_msgs</depend>
   <depend>tf</depend>
+  <depend>teleop_twist_keyboard</depend>
 
   <export>
     <controller_interface plugin="${prefix}/hero_chassis_controller_plugins.xml"/>

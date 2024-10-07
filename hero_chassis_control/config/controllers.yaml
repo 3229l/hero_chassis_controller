@@ -1,10 +1,10 @@
 controller:
   hero_chassis_controller:
     type: hero_chassis_controller/HeroChassisController
-    pid_front_left_: { p: 0.0, i: 0.0, d: 0.0}
-    pid_front_right_: { p: 0.0, i: 0.0, d: 0.0}
-    pid_back_left_: { p: 0.0, i: 0.0, d: 0.0}
-    pid_back_right_: { p: 0.0, i: 0.0, d: 0.0}
+    pid_front_left_: { p: 400.0, i: 218.0, d: 100.0}
+    pid_front_right_: { p: 400.0, i: 218.0, d: 100.0}
+    pid_back_left_: { p: 400.0, i: 218.0, d: 100.0}
+    pid_back_right_: { p: 400.0, i: 218.0, d: 100.0}
     Alpha: 0.5
     Wheel_Track: 0.4
     Wheel_Base: 0.4
