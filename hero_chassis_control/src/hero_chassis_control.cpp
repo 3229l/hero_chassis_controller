@@ -91,7 +91,7 @@ void HeroChassisController::update(const ros::Time &time, const ros::Duration &p
   }
   //pid control
   for ( int i = 1; i <= 4; i++ ) {
-    vel_smoothed [i] = vel_actual[i];
+    // 使用上一次的 vel_smoothed[i] 来进行平滑计算
     vel_smoothed[i] = Alpha * vel_actual[i] + (1 - Alpha) * vel_smoothed[i];
     error[i] = vel_expected[i] - vel_smoothed[i];
   }
